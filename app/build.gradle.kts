@@ -15,6 +15,16 @@ if (localPropertiesFile.exists()){
 }
 val apiKey = localProperties.getProperty("API_KEY") ?: ""
 
+tasks.register("generateSha1") {
+    doLast {
+        val command = "keytool -list -v -keystore \"${System.getProperty("user.home").replace("\\", "/")}/.android/debug.keystore\" -alias androiddebugkey -storepass android -keypass android"
+        val process = Runtime.getRuntime().exec(command)
+        val inputStream = process.inputStream
+        val text = inputStream.bufferedReader().use { it.readText() }
+        println(text.lines().firstOrNull { it.startsWith("SHA1:") })
+    }
+}
+
 android {
     namespace = "com.klaudia.bookshelf"
     compileSdk = 34
@@ -69,7 +79,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.02.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -84,6 +94,7 @@ dependencies {
 
     implementation ("com.google.dagger:hilt-android:2.48")
     kapt("com.google.dagger:hilt-compiler:2.48")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
     implementation("androidx.core:core-splashscreen:1.0.1")
@@ -91,6 +102,12 @@ dependencies {
     // Retrofit
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2")
+    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.1")
+    implementation ("io.coil-kt:coil-compose:2.2.2" )
+
+
 }
 kapt {
     correctErrorTypes = true
