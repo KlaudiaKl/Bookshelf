@@ -20,8 +20,12 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
     private val _newestBooks = MutableStateFlow<RequestState<VolumeApiResponse?>>(RequestState.Loading)
     val newestBooks : StateFlow<RequestState<VolumeApiResponse?>> = _newestBooks.asStateFlow()
 
+    private val _volumesByCategory = MutableStateFlow<RequestState<VolumeApiResponse?>>(RequestState.Loading)
+    val volumesByCategory : StateFlow<RequestState<VolumeApiResponse?>> = _newestBooks.asStateFlow()
+
     init {
-        loadBooks("flowers")
+       loadBooks("science fiction")
+        //loadBooksOfCategory("Science Fiction & Fantasy")
     }
     fun loadBooks(query: String){
         viewModelScope.launch {
@@ -33,6 +37,19 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
                 _newestBooks.value = RequestState.Error(Exception("Api call unsuccessful"))
             }
 
+        }
+    }
+
+    fun loadBooksOfCategory(category: String){
+        viewModelScope.launch {
+            val result = repository.listVolumesByCategory(category)
+            if (result!=null){
+                _newestBooks.value = RequestState.Success(result)
+            }
+
+            else{
+                _newestBooks.value = RequestState.Error(Exception("Api call unsuccessful"))
+            }
         }
     }
 }

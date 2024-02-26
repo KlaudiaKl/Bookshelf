@@ -8,9 +8,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,18 +29,48 @@ import com.klaudia.bookshelf.presentation.components.VolumeItemHolder
 
 @Composable
 fun HomeScreen(
-    volumes: List<VolumeItem>
+    volumes: List<VolumeItem>,
+    //query: String,
+    onButtonClick: (String) -> Unit,
+    //onQueryChange: () -> Unit
 ) {
+    var query by remember { mutableStateOf("") }
+    var showButton  by remember {
+        mutableStateOf(false)
+    }
 
+    LaunchedEffect(query){
+        showButton = query.isNotEmpty()
+    }
     Column(modifier = Modifier.padding(16.dp)) {
         Text(text = "Bookshelf", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = query,
+            onValueChange = {
+
+                query = it
+            },
+            label = { Text(text = "Search")},
+            singleLine = true,
+            modifier = Modifier.padding(8.dp)
+        )
+        if (showButton){
+            Button(onClick = {onButtonClick(query)},
+                modifier = Modifier.padding(8.dp)) {
+                Text(text = "Search")
+            }
+        }
+
+
         Spacer(modifier = Modifier.height(8.dp))
         LazyRow() {
 
             items(items = volumes) {
                 VolumeItemHolder(imageUrl = it.volumeInfo.imageLinks.smallThumbnail, title = it.volumeInfo.title)
                 Spacer(modifier = Modifier.width(4.dp))
-                //Text(text = it.volumeInfo.title)
+
             }
 
         }

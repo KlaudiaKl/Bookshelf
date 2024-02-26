@@ -20,7 +20,7 @@ fun VolumeItemHolder(imageUrl: String, title: String) {
             .width(100.dp)
             .height(180.dp), verticalArrangement = Arrangement.Top
     ){
-        DisplayImageFromUrl(imageUrl = imageUrl, contentDescription = "Volume cover image")
+        DisplayImageFromUrl(imageUrl = imageUrl, contentDescription = "Volume cover image", modifier = Modifier.fillMaxWidth().height(100.dp))
         //Spacer(modifier = Modifier.height(4.dp))
         Text(text = title,
             //modifier = Modifier.fillMaxWidth(),

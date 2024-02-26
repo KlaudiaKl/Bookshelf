@@ -10,7 +10,10 @@ import retrofit2.http.Query
 interface BooksApi {
 
     @GET("books/v1/volumes")
-    suspend fun searchBooks(@Query("q") query: String, @Query("key") apiKey: String = BuildConfig.API_KEY) : Response<VolumeApiResponse>
+    suspend fun searchBooks(
+        @Query("q") query: String,
+        @Query("maxResults") maxResults: Int = 20,
+        @Query("key") apiKey: String = BuildConfig.API_KEY) : Response<VolumeApiResponse>
 
     @GET("books/v1/volumes")
     suspend fun listVolumesFromNewest(
@@ -18,4 +21,10 @@ interface BooksApi {
         @Query("orderBy") orderBy: String = "newest",
         @Query("key") apiKey: String = BuildConfig.API_KEY
     ): Response<VolumeApiResponse>
+
+    @GET("books/v1/volumes")
+    suspend fun listVolumesByMainCategory(
+        @Query("mainCategory") category: String,
+        @Query("key") apiKey : String = BuildConfig.API_KEY
+    ) : Response<VolumeApiResponse>
 }

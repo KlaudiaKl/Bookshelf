@@ -9,15 +9,44 @@ import javax.inject.Inject
 
 class BooksRepositoryImplementation @Inject constructor(private val apiService: BooksApi) :
     BooksRepository {
-    override suspend fun searchBooks(query: String) {
-        apiService.searchBooks(query)
+    override suspend fun searchBooks(query: String): VolumeApiResponse? {
+        return try {
+            val response = apiService.searchBooks(query)
+            if(response.isSuccessful){
+                response.body()
+            }
+            else{
+                Log.d("Error", "response unsuccessful")
+                null
+            }
+
+        } catch (e:Exception){
+            e.message?.let { Log.d("Error", it) }
+            null
+        }
     }
 
     override suspend fun listVolumesFromNewest(query: String): VolumeApiResponse? {
         return try {
             val response = apiService.listVolumesFromNewest(query)
             if(response.isSuccessful){
+                response.body()
+            }
+            else{
+                Log.d("Error", "response unsuccessful")
+                null
+            }
 
+        } catch (e:Exception){
+            e.message?.let { Log.d("Error", it) }
+            null
+        }
+    }
+
+    override suspend fun listVolumesByCategory(category: String): VolumeApiResponse? {
+        return try {
+            val response = apiService.listVolumesByMainCategory(category)
+            if(response.isSuccessful){
                 response.body()
             }
             else{

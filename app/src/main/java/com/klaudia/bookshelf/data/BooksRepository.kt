@@ -6,6 +6,8 @@ import retrofit2.Call
 import retrofit2.Response
 
 interface BooksRepository {
-    suspend fun searchBooks(query:String)
+    suspend fun searchBooks(query:String): VolumeApiResponse?
     suspend fun listVolumesFromNewest(query: String) : VolumeApiResponse?
+
+    suspend fun listVolumesByCategory(category: String): VolumeApiResponse?
 }
