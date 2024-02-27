@@ -16,7 +16,7 @@ data class VolumeInfo(
     val allowAnonLogging: Boolean,
     val contentVersion: String,
     val panelizationSummary: PanelizationSummary,
-    val imageLinks: ImageLinks,
+    val imageLinks: ImageLinks?,
     val language: String,
     val previewLink: String,
     val infoLink: String,

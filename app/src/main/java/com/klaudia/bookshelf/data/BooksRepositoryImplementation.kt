@@ -2,27 +2,25 @@ package com.klaudia.bookshelf.data
 
 import android.util.Log
 import com.klaudia.bookshelf.model.VolumeApiResponse
-import com.klaudia.bookshelf.model.VolumeItem
-import retrofit2.Call
-import retrofit2.Response
+
 import javax.inject.Inject
 
 class BooksRepositoryImplementation @Inject constructor(private val apiService: BooksApi) :
     BooksRepository {
-    override suspend fun searchBooks(query: String): VolumeApiResponse? {
+    override suspend fun searchBooks(query: String, startIndex: Int): RequestState<VolumeApiResponse>? {
         return try {
-            val response = apiService.searchBooks(query)
-            if(response.isSuccessful){
-                response.body()
+            val response = apiService.searchBooks(query, startIndex)
+            if(response.isSuccessful && response.body()!=null){
+                RequestState.Success(response.body()!!)
             }
             else{
                 Log.d("Error", "response unsuccessful")
-                null
+                RequestState.Error(Exception("Response unsuccessful"))
             }
 
         } catch (e:Exception){
             e.message?.let { Log.d("Error", it) }
-            null
+            RequestState.Error(e)
         }
     }
 

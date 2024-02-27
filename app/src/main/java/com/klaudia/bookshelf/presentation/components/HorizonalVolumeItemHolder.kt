@@ -1,10 +1,8 @@
 package com.klaudia.bookshelf.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -29,7 +27,7 @@ fun HorizontalVolumeItemHolder(imageUrl: String, title: String) {
     ){
         DisplayImageFromUrl(imageUrl = imageUrl, contentDescription = "Volume cover image", modifier = Modifier.size(100.dp))
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = title?:"Untitled",
+        Text(text = title,
             //modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.titleSmall)
         //fontStyle = MaterialTheme.colorScheme.onBackground)

@@ -3,16 +3,13 @@ package com.klaudia.bookshelf.navigation
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -51,20 +48,61 @@ fun NavGraphBuilder.homeScreenRoute(
 ) {
     composable(Screen.HomeScreen.route) {
         val viewModel: HomeViewModel = hiltViewModel()
-        val newestVolumes = viewModel.newestBooks.collectAsState().value
+        val newestVolumes by viewModel.newestBooks.collectAsState()
+        val oopBooks by viewModel.oopBooks.collectAsState()
+        val kotlinBooks by viewModel.kotlinBooks.collectAsState()
+        val composeBooks by viewModel.composeBooks.collectAsState()
         var items = emptyList<VolumeItem>()
-        var query by remember { mutableStateOf("") }
+        var oopItems = emptyList<VolumeItem>()
+        var kotlinItems = emptyList<VolumeItem>()
+        var composeItems = emptyList<VolumeItem>()
 
         when (newestVolumes) {
             is RequestState.Success -> {
-                if (newestVolumes.data != null)
-                    items = newestVolumes.data.items
+                val successState = newestVolumes as RequestState.Success<VolumeApiResponse?>
+                if (successState.data != null)
+                    items = successState.data.items
             }
-
             is RequestState.Loading -> {
                 CircularProgressIndicator()
             }
+            is RequestState.Error -> {
+                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
+                Log.d("Error (navGraph)", "newestVolumes error")
+            }
+        }
 
+        when (oopBooks) {
+            is RequestState.Success -> {
+                oopItems = (oopBooks as RequestState.Success<List<VolumeItem>>).data
+            }
+            is RequestState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is RequestState.Error -> {
+                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
+                Log.d("Error (navGraph)", "newestVolumes error")
+            }
+        }
+        when (kotlinBooks) {
+            is RequestState.Success -> {
+                kotlinItems = (kotlinBooks as RequestState.Success<List<VolumeItem>>).data
+            }
+            is RequestState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is RequestState.Error -> {
+                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
+                Log.d("Error (navGraph)", "newestVolumes error")
+            }
+        }
+        when (composeBooks) {
+            is RequestState.Success -> {
+                composeItems = (composeBooks as RequestState.Success<List<VolumeItem>>).data
+            }
+            is RequestState.Loading -> {
+                CircularProgressIndicator()
+            }
             is RequestState.Error -> {
                 Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
                 Log.d("Error (navGraph)", "newestVolumes error")
@@ -74,6 +112,9 @@ fun NavGraphBuilder.homeScreenRoute(
 
         HomeScreen(
             volumes = items,
+            oopItems = oopItems,
+            kotlinItems = kotlinItems,
+            composeItems = composeItems,
             onButtonClick = {
                 navigateToSearchResultsScreen(it)
             }
@@ -84,20 +125,23 @@ fun NavGraphBuilder.homeScreenRoute(
 fun NavGraphBuilder.searchResultsRoute() {
     composable(
         route = Screen.SearchResultsScreen.route,
-        arguments = listOf(navArgument("query"){type = NavType.StringType})
+        arguments = listOf(navArgument("query") { type = NavType.StringType })
     ) {
         val arg = it.arguments?.getString("query") ?: ""
         val viewModel: SearchViewModel = hiltViewModel()
-       LaunchedEffect(arg){
-            viewModel.search(arg)
+        LaunchedEffect(arg) {
+            viewModel.search(arg, false)
         }
         val searchResults by viewModel.searchResults.collectAsState()
-        var items = emptyList<VolumeItem>()
+
+        var items: List<VolumeItem>
         when (searchResults) {
             is RequestState.Success -> {
-                val successState = searchResults as RequestState.Success<VolumeApiResponse?>
-                if (successState.data != null)
-                    items = successState.data.items
+                val successState = (searchResults as RequestState.Success<List<VolumeItem>>).data
+                items = successState
+                SearchResultsScreen(
+                    result = items, query = arg, viewModel = viewModel
+                )
             }
 
             is RequestState.Loading -> {
@@ -107,10 +151,8 @@ fun NavGraphBuilder.searchResultsRoute() {
             is RequestState.Error -> {
                 Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
                 Log.d("Error (navGraph)", "newestVolumes error")
+                Text(text = "Error")
             }
         }
-
-        SearchResultsScreen(result = items, query = arg)
-
     }
 }
