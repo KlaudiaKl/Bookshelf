@@ -2,6 +2,7 @@ package com.klaudia.bookshelf.data
 
 import android.util.Log
 import com.klaudia.bookshelf.model.VolumeApiResponse
+import com.klaudia.bookshelf.model.VolumeItem
 
 import javax.inject.Inject
 
@@ -23,6 +24,24 @@ class BooksRepositoryImplementation @Inject constructor(private val apiService: 
             RequestState.Error(e)
         }
     }
+
+    override suspend fun getVolumeById(id: String): RequestState<VolumeItem> {
+        return try {
+            val response = apiService.getVolumeById(id)
+            if (response.isSuccessful&&response.body()!=null){
+                RequestState.Success(response.body()!!)
+            }
+            else{
+                Log.d("Error", "Response unsuccessful")
+                RequestState.Error(Exception("Response unsuccessful"))
+            }
+        }
+        catch (e:Exception){
+            e.message?.let { Log.d("Error", it) }
+            RequestState.Error(e)
+        }
+    }
+
 
     override suspend fun listVolumesFromNewest(query: String): VolumeApiResponse? {
         return try {

@@ -1,5 +1,6 @@
 package com.klaudia.bookshelf.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,11 +17,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HorizontalVolumeItemHolder(imageUrl: String, title: String) {
+fun HorizontalVolumeItemHolder(
+    imageUrl: String,
+    title: String,
+    onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp),
+            .height(100.dp)
+            .clickable { onClick() },
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
 
@@ -40,7 +45,8 @@ fun HorizontalItemPrev() {
 
         HorizontalVolumeItemHolder(
             imageUrl = "https://books.google.com/books?id=zyTCAlFPjgYC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api",
-            title = "The Google story")
+            title = "The Google story",
+            onClick = {})
 
     
 }

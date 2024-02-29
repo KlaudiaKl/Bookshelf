@@ -32,6 +32,7 @@ fun HomeScreen(
     kotlinItems: List<VolumeItem>,
     composeItems: List<VolumeItem>,
     onButtonClick: (String) -> Unit,
+    onVolumeClick: (String) -> Unit
     //onQueryChange: () -> Unit
 ) {
     var query by remember { mutableStateOf("") }
@@ -76,7 +77,8 @@ fun HomeScreen(
                 if (it.volumeInfo.title.isNotEmpty()) {
                     VolumeItemHolder(
                         imageUrl = it.volumeInfo.imageLinks?.thumbnail?:"",
-                        title = it.volumeInfo.title
+                        title = it.volumeInfo.title,
+                        onClick = {onVolumeClick(it.id)}
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 
@@ -93,7 +95,8 @@ fun HomeScreen(
                 if (it.volumeInfo.title.isNotEmpty()) {
                     VolumeItemHolder(
                         imageUrl = it.volumeInfo.imageLinks?.thumbnail?:"",
-                        title = it.volumeInfo.title
+                        title = it.volumeInfo.title,
+                        onClick = {onVolumeClick(it.id)}
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 
@@ -110,7 +113,8 @@ fun HomeScreen(
                 if (it.volumeInfo.title.isNotEmpty()) {
                     VolumeItemHolder(
                         imageUrl = it.volumeInfo.imageLinks?.thumbnail?:"",
-                        title = it.volumeInfo.title
+                        title = it.volumeInfo.title,
+                        onClick = {onVolumeClick(it.id)}
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 
@@ -126,7 +130,8 @@ fun HomeScreen(
                 if (it.volumeInfo.title.isNotEmpty()) {
                     VolumeItemHolder(
                         imageUrl = it.volumeInfo.imageLinks?.thumbnail?:"",
-                        title = it.volumeInfo.title
+                        title = it.volumeInfo.title,
+                        onClick = {onVolumeClick(it.id)}
                     )
                     Spacer(modifier = Modifier.width(4.dp))
 

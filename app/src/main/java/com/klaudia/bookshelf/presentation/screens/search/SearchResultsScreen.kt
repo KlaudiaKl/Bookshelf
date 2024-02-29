@@ -25,7 +25,8 @@ import kotlinx.coroutines.launch
 fun SearchResultsScreen(
     result: List<VolumeItem>,
     query: String,
-    viewModel : SearchViewModel
+    viewModel : SearchViewModel,
+    onVolumeClick: (String) -> Unit
 ) {
     val listState = rememberLazyListState()
     Column {
@@ -37,7 +38,8 @@ fun SearchResultsScreen(
                 if (!it.volumeInfo.title.isNullOrEmpty()) {
                     HorizontalVolumeItemHolder(
                         imageUrl = it.volumeInfo.imageLinks?.thumbnail?:"",
-                        title = it.volumeInfo.title
+                        title = it.volumeInfo.title,
+                        onClick = {onVolumeClick(it.id)}
 
                     )
                     Log.d(

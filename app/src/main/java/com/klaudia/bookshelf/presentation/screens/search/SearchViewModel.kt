@@ -28,7 +28,7 @@ class SearchViewModel @Inject constructor(private val booksRepository: BooksRepo
 
     private var searchJob: Job? = null
     fun search(query: String, loadMore: Boolean) {
-        Log.d("LoadMore", loadMore.toString())
+       // Log.d("LoadMore", loadMore.toString())
         if (loadMore) {
             startIndex += 10
         } else {
@@ -48,7 +48,7 @@ class SearchViewModel @Inject constructor(private val booksRepository: BooksRepo
                     if (result.data != null) {
                         val newItems = result.data.items.filterNot { newItem -> items.any { existingItem -> existingItem.id == newItem.id } }
                         items.addAll(newItems)
-                        Log.d("items", items.size.toString())
+                       // Log.d("items", items.size.toString())
                         _searchResults.value = RequestState.Success(items.toList())
                     } else {
                         _searchResults.value =
