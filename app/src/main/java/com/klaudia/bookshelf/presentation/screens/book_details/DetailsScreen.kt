@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,7 +33,8 @@ import com.klaudia.bookshelf.presentation.components.HyperlinkText
 @Composable
 fun DetailsScreen(
     volume: VolumeItem,
-    onHyperLinkClick: (String) -> Unit
+    onHyperLinkClick: (String) -> Unit,
+    onSaveClicked: () -> Unit
 ) {
 
     Column(
@@ -50,6 +53,14 @@ fun DetailsScreen(
                 text = volume.volumeInfo.title,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
             )
+        }
+
+        Button(onClick = { onSaveClicked() }) {
+            Row {
+                Icon(imageVector = Icons.Default.FavoriteBorder, contentDescription = "saved icon" )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Save")
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
         if (!volume.volumeInfo.authors.isNullOrEmpty()) Text(text = "By ${volume.volumeInfo.authors.joinToString(separator = ", ") }")

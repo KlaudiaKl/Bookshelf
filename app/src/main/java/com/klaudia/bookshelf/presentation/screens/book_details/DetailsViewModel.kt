@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.klaudia.bookshelf.data.BooksRepository
 import com.klaudia.bookshelf.data.RequestState
+import com.klaudia.bookshelf.db.SavedVolume
 import com.klaudia.bookshelf.model.VolumeItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,12 @@ class DetailsViewModel @Inject constructor(private val repository: BooksReposito
             else{
                 _volumeItem.value = RequestState.Error(Exception("Api call unsuccessful"))
             }
+        }
+    }
+
+    fun addVolumeToSaved(volume: SavedVolume){
+        viewModelScope.launch {
+            repository.insertVolumeToSaved(volume)
         }
     }
 }

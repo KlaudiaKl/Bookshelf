@@ -4,12 +4,15 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -17,14 +20,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.klaudia.bookshelf.data.RequestState
+import com.klaudia.bookshelf.db.SavedVolume
 import com.klaudia.bookshelf.model.VolumeApiResponse
 import com.klaudia.bookshelf.model.VolumeItem
+import com.klaudia.bookshelf.presentation.components.AppBottomNavigation
 import com.klaudia.bookshelf.presentation.screens.book_details.DetailsScreen
 import com.klaudia.bookshelf.presentation.screens.book_details.DetailsViewModel
 import com.klaudia.bookshelf.presentation.screens.home.HomeScreen
 import com.klaudia.bookshelf.presentation.screens.home.HomeViewModel
+import com.klaudia.bookshelf.presentation.screens.saved_volumes.SavedVolumesScreen
+import com.klaudia.bookshelf.presentation.screens.saved_volumes.SavedVolumesViewModel
 import com.klaudia.bookshelf.presentation.screens.search.SearchResultsScreen
 import com.klaudia.bookshelf.presentation.screens.search.SearchViewModel
 
@@ -33,31 +41,45 @@ fun SetUpNavGraph(
     startDestination: String,
     navController: NavHostController
 ) {
-    NavHost(navController = navController, startDestination = startDestination) {
-        homeScreenRoute(
-            navigateToSearchResultsScreen = {
-                navController.navigate(
-                    Screen.SearchResultsScreen.createRoute(
-                        it
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    Scaffold(bottomBar = {
+        if (currentRoute == Screen.HomeScreen.route || currentRoute == Screen.SavedVolumesScreen.route) AppBottomNavigation(navHostController = navController)}
+    ) { padding ->
+
+
+        NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.padding(padding)) {
+            homeScreenRoute(
+                navigateToSearchResultsScreen = {
+                    navController.navigate(
+                        Screen.SearchResultsScreen.createRoute(
+                            it
+                        )
                     )
-                )
-            },
-            navigateToDetailsScreen = {
-                navController.navigate(
-                    Screen.DetailsScreen.createDetailsRoute(
-                        it
+                },
+                navigateToDetailsScreen = {
+                    navController.navigate(
+                        Screen.DetailsScreen.createDetailsRoute(
+                            it
+                        )
                     )
-                )
-            }
-        )
-        searchResultsRoute(
-            navigateToDetailsScreen = {
-                navController.navigate(
-                    Screen.DetailsScreen.createDetailsRoute(it)
-                )
-            }
-        )
-        detailScreenRoute()
+                }
+            )
+            searchResultsRoute(
+                navigateToDetailsScreen = {
+                    navController.navigate(
+                        Screen.DetailsScreen.createDetailsRoute(it)
+                    )
+                }
+            )
+            detailScreenRoute()
+            savedVolumesRoute(
+                navigateToDetailsScreen = {
+                    navController.navigate(
+                        Screen.DetailsScreen.createDetailsRoute(it)
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -204,12 +226,25 @@ fun NavGraphBuilder.detailScreenRoute() {
             is RequestState.Success -> {
                 DetailsScreen(
                     volume = volume.data,
-                    onHyperLinkClick = {
-                        url ->
+                    onHyperLinkClick = { url ->
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                         context.startActivity(intent)
+                    },
+                    onSaveClicked = {
+                        val toBeSavedVolume = SavedVolume(
+                            title = volume.data.volumeInfo.title,
+                            authors = volume.data.volumeInfo.authors ?: emptyList(),
+                            id = volume.data.id,
+                            thumbnailUrl = volume.data.volumeInfo.imageLinks?.thumbnail ?: "",
+                            description = volume.data.volumeInfo.description ?: "",
+                            pageCount = volume.data.volumeInfo.pageCount,
+                            language = volume.data.volumeInfo.language,
+                            publishingDate = volume.data.volumeInfo.publishedDate,
+                            link = volume.data.saleInfo.buyLink ?: ""
+                        )
+                        viewModel.addVolumeToSaved(toBeSavedVolume)
                     }
-                    )
+                )
             }
 
             is RequestState.Loading -> {
@@ -221,5 +256,36 @@ fun NavGraphBuilder.detailScreenRoute() {
                 Text(text = "Error")
             }
         }
+    }
+}
+
+fun NavGraphBuilder.savedVolumesRoute(
+    navigateToDetailsScreen: (String) -> Unit
+) {
+    composable(
+        route = Screen.SavedVolumesScreen.route
+    ) {
+        val viewModel: SavedVolumesViewModel = hiltViewModel()
+        val books = viewModel.volumes.collectAsState().value
+        when (books) {
+            is RequestState.Success -> {
+                val successState = books.data
+
+                SavedVolumesScreen(result = books.data, onVolumeClick = {
+                    navigateToDetailsScreen(it)
+                })
+            }
+
+            is RequestState.Loading -> {
+                CircularProgressIndicator()
+            }
+
+            is RequestState.Error -> {
+                // Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
+                Log.d("Error (navGraph)", "savedVolumes error")
+                Text(text = "Error")
+            }
+        }
+
     }
 }

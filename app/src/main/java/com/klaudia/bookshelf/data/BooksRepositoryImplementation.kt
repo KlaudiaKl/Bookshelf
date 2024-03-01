@@ -1,12 +1,14 @@
 package com.klaudia.bookshelf.data
 
 import android.util.Log
+import com.klaudia.bookshelf.db.SavedVolume
+import com.klaudia.bookshelf.db.VolumeDao
 import com.klaudia.bookshelf.model.VolumeApiResponse
 import com.klaudia.bookshelf.model.VolumeItem
 
 import javax.inject.Inject
 
-class BooksRepositoryImplementation @Inject constructor(private val apiService: BooksApi) :
+class BooksRepositoryImplementation @Inject constructor(private val apiService: BooksApi, private val volumeDao: VolumeDao) :
     BooksRepository {
     override suspend fun searchBooks(query: String, startIndex: Int): RequestState<VolumeApiResponse>? {
         return try {
@@ -76,4 +78,13 @@ class BooksRepositoryImplementation @Inject constructor(private val apiService: 
             null
         }
     }
+
+    override suspend fun insertVolumeToSaved(volume: SavedVolume) {
+        volumeDao.insert(volume)
+    }
+
+    override suspend fun getAllSavedVolumes(): List<SavedVolume> {
+        return volumeDao.getAllSavedVolumes()
+    }
+
 }

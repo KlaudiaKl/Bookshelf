@@ -8,4 +8,6 @@ sealed class Screen(val route: String) {
     object DetailsScreen: Screen(route = "details_screen/{volumeId}"){
         fun createDetailsRoute(volumeId: String) = "details_screen/$volumeId"
     }
+
+    object SavedVolumesScreen: Screen(route = "saved_volumes_screen")
 }
