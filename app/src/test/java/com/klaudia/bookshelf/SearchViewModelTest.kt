@@ -114,10 +114,10 @@ class SearchViewModelTest {
             items = dummyVolumeItems
         )
         coEvery {
-            booksRepo.searchBooks(query, 0)
+            booksRepo.searchBooks(query, 0, null)
         } returns RequestState.Success(dummyVolumeApiResponse)
 
-        viewModel.search(query, false)
+        viewModel.search(query, false, null)
         advanceUntilIdle()
         val searchResults = viewModel.searchResults.value
         assertTrue(searchResults is RequestState.Success)

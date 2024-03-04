@@ -3,7 +3,6 @@ package com.klaudia.bookshelf.navigation
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.klaudia.bookshelf.data.RequestState
 import com.klaudia.bookshelf.db.SavedVolume
-import com.klaudia.bookshelf.model.VolumeApiResponse
 import com.klaudia.bookshelf.model.VolumeItem
 import com.klaudia.bookshelf.presentation.components.AppBottomNavigation
 import com.klaudia.bookshelf.presentation.components.EmptyScreen

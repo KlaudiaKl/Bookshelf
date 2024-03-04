@@ -25,8 +25,6 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
     private val _newestBooks = MutableStateFlow<RequestState<VolumeApiResponse?>>(RequestState.Loading)
     val newestBooks : StateFlow<RequestState<VolumeApiResponse?>> = _newestBooks.asStateFlow()
 
-    private val _volumesByCategory = MutableStateFlow<RequestState<VolumeApiResponse?>>(RequestState.Loading)
-    val volumesByCategory : StateFlow<RequestState<VolumeApiResponse?>> = _volumesByCategory.asStateFlow()
 
     private val _oopBooks = MutableStateFlow<RequestState<List<VolumeItem>>>(RequestState.Loading)
     val oopBooks : StateFlow<RequestState<List<VolumeItem>>> = _oopBooks.asStateFlow()
@@ -44,7 +42,7 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
         loadComposeBooks()
         //loadBooksOfCategory("Science Fiction & Fantasy")
     }
-    fun loadBooks(query: String){
+    private fun loadBooks(query: String){
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO){ repository.listVolumesFromNewest(query)}
             if (result !=null){
@@ -56,7 +54,7 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
         }
     }
 
-   fun loadOopBooks(){
+   private fun loadOopBooks(){
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO){ repository.searchBooks("Object oriented Programming", 0, filter = null)}
             if (result !=null){
@@ -79,7 +77,7 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
         }
     }
 
-    fun loadKotlinBooks(){
+    private fun loadKotlinBooks(){
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO){ repository.searchBooks("Kotlin", 0, filter = null)}
             if (result !=null){
@@ -101,7 +99,7 @@ class HomeViewModel @Inject constructor(private val repository: BooksRepository)
             }
         }
     }
-    fun loadComposeBooks(){
+    private fun loadComposeBooks(){
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO){ repository.searchBooks("Jetpack Compose", 0, filter = null)}
             if (result !=null){

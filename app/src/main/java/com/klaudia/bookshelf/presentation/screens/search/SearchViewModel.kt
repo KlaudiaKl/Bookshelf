@@ -1,6 +1,6 @@
 package com.klaudia.bookshelf.presentation.screens.search
 
-import android.util.Log
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.klaudia.bookshelf.data.BooksRepository
