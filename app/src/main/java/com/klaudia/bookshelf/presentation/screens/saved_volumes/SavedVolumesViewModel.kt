@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -26,13 +28,16 @@ class SavedVolumesViewModel @Inject constructor(private val repository: BooksRep
 
     fun getSavedBooks(){
         viewModelScope.launch {
-            val result = withContext(Dispatchers.IO){ repository.getAllSavedVolumes()}
-            if (result !=null){
-                _volumes.value = RequestState.Success(result)
-            }
-            else{
-                _volumes.value = RequestState.Error(Exception("Api call unsuccessful"))
-            }
+            repository.getAllSavedVolumes()
+                .map { volumes ->
+                    RequestState.Success(volumes) as RequestState<List<SavedVolume>>
+                }
+                .catch { exception ->
+                    emit(RequestState.Error(exception))
+                }
+                .collect { state ->
+                    _volumes.value = state
+                }
         }
     }
 

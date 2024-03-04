@@ -13,8 +13,10 @@ interface BooksApi {
     @GET("books/v1/volumes")
     suspend fun searchBooks(
         @Query("q") query: String,
-        //@Query("maxResults") maxResults: Int = 20,
         @Query("startIndex") startIndex: Int = 0,
+        @Query("filter") filter: String? = null,
+        //@Query("maxResults") maxResults: Int = 20,
+
         @Query("key") apiKey: String = BuildConfig.API_KEY) : Response<VolumeApiResponse>
 
     @GET("books/v1/volumes/{volumeId}")

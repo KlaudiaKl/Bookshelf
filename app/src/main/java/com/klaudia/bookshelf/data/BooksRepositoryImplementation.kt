@@ -5,14 +5,15 @@ import com.klaudia.bookshelf.db.SavedVolume
 import com.klaudia.bookshelf.db.VolumeDao
 import com.klaudia.bookshelf.model.VolumeApiResponse
 import com.klaudia.bookshelf.model.VolumeItem
+import kotlinx.coroutines.flow.Flow
 
 import javax.inject.Inject
 
 class BooksRepositoryImplementation @Inject constructor(private val apiService: BooksApi, private val volumeDao: VolumeDao) :
     BooksRepository {
-    override suspend fun searchBooks(query: String, startIndex: Int): RequestState<VolumeApiResponse>? {
+    override suspend fun searchBooks(query: String, startIndex: Int, filter: String?): RequestState<VolumeApiResponse>? {
         return try {
-            val response = apiService.searchBooks(query, startIndex)
+            val response = apiService.searchBooks(query, startIndex, filter = filter)
             if(response.isSuccessful && response.body()!=null){
                 RequestState.Success(response.body()!!)
             }
@@ -83,8 +84,14 @@ class BooksRepositoryImplementation @Inject constructor(private val apiService: 
         volumeDao.insert(volume)
     }
 
-    override suspend fun getAllSavedVolumes(): List<SavedVolume> {
+    override fun getAllSavedVolumes(): Flow<List<SavedVolume>> {
         return volumeDao.getAllSavedVolumes()
     }
+
+    override suspend fun deleteVolumeFromSaved(volumeId: String) {
+        return volumeDao.deleteById(volumeId)
+    }
+
+    override fun isVolumeSaved(volumeId: String): Flow<Boolean> = volumeDao.isVolumeSaved(volumeId)
 
 }

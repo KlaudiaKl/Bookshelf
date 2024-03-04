@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -12,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,8 +30,10 @@ import com.klaudia.bookshelf.db.SavedVolume
 import com.klaudia.bookshelf.model.VolumeApiResponse
 import com.klaudia.bookshelf.model.VolumeItem
 import com.klaudia.bookshelf.presentation.components.AppBottomNavigation
+import com.klaudia.bookshelf.presentation.components.EmptyScreen
 import com.klaudia.bookshelf.presentation.screens.book_details.DetailsScreen
 import com.klaudia.bookshelf.presentation.screens.book_details.DetailsViewModel
+import com.klaudia.bookshelf.presentation.screens.home.CombinedBooksState
 import com.klaudia.bookshelf.presentation.screens.home.HomeScreen
 import com.klaudia.bookshelf.presentation.screens.home.HomeViewModel
 import com.klaudia.bookshelf.presentation.screens.saved_volumes.SavedVolumesScreen
@@ -89,86 +94,25 @@ fun NavGraphBuilder.homeScreenRoute(
 ) {
     composable(Screen.HomeScreen.route) {
         val viewModel: HomeViewModel = hiltViewModel()
-        val newestVolumes by viewModel.newestBooks.collectAsState()
-        val oopBooks by viewModel.oopBooks.collectAsState()
-        val kotlinBooks by viewModel.kotlinBooks.collectAsState()
-        val composeBooks by viewModel.composeBooks.collectAsState()
-        var items = emptyList<VolumeItem>()
-        var oopItems = emptyList<VolumeItem>()
-        var kotlinItems = emptyList<VolumeItem>()
-        var composeItems = emptyList<VolumeItem>()
+        val state by viewModel.combinedBooksState.collectAsState(initial = CombinedBooksState(isLoading = true))
 
-        when (newestVolumes) {
-            is RequestState.Success -> {
-                val successState = newestVolumes as RequestState.Success<VolumeApiResponse?>
-                if (successState.data != null)
-                    items = successState.data.items
-            }
-
-            is RequestState.Loading -> {
+        when {
+            state.isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-
-            is RequestState.Error -> {
-                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
-                Log.d("Error (navGraph)", "newestVolumes error")
+            state.error != null -> {
+                EmptyScreen()
             }
+            else -> HomeScreen(
+                volumes = state.newestVolumes ?: emptyList(),
+                oopItems = state.oopBooks ?: emptyList(),
+                kotlinItems = state.kotlinBooks ?: emptyList(),
+                composeItems = state.composeBooks ?: emptyList(),
+                onButtonClick = navigateToSearchResultsScreen,
+                onVolumeClick = navigateToDetailsScreen,
+                onSeeMoreButtonClick = navigateToSearchResultsScreen
+            )
         }
-
-        when (oopBooks) {
-            is RequestState.Success -> {
-                oopItems = (oopBooks as RequestState.Success<List<VolumeItem>>).data
-            }
-
-            is RequestState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            is RequestState.Error -> {
-                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
-                Log.d("Error (navGraph)", "newestVolumes error")
-            }
-        }
-        when (kotlinBooks) {
-            is RequestState.Success -> {
-                kotlinItems = (kotlinBooks as RequestState.Success<List<VolumeItem>>).data
-            }
-
-            is RequestState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            is RequestState.Error -> {
-                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
-                Log.d("Error (navGraph)", "newestVolumes error")
-            }
-        }
-        when (composeBooks) {
-            is RequestState.Success -> {
-                composeItems = (composeBooks as RequestState.Success<List<VolumeItem>>).data
-            }
-
-            is RequestState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            is RequestState.Error -> {
-                Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
-                Log.d("Error (navGraph)", "newestVolumes error")
-            }
-        }
-        Log.d("List", items.toString())
-
-        HomeScreen(
-            volumes = items,
-            oopItems = oopItems,
-            kotlinItems = kotlinItems,
-            composeItems = composeItems,
-            onButtonClick = {
-                navigateToSearchResultsScreen(it)
-            },
-            onVolumeClick = { navigateToDetailsScreen(it) }
-        )
     }
 }
 
@@ -182,7 +126,7 @@ fun NavGraphBuilder.searchResultsRoute(
         val arg = it.arguments?.getString("query") ?: ""
         val viewModel: SearchViewModel = hiltViewModel()
         LaunchedEffect(arg) {
-            viewModel.search(arg, false)
+            viewModel.search(arg, false, filter = null)
         }
         val searchResults by viewModel.searchResults.collectAsState()
 
@@ -199,7 +143,9 @@ fun NavGraphBuilder.searchResultsRoute(
             }
 
             is RequestState.Loading -> {
-                CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
 
             is RequestState.Error -> {
@@ -222,6 +168,7 @@ fun NavGraphBuilder.detailScreenRoute() {
         LaunchedEffect(volumeId) {
             viewModel.getVolume(volumeId)
         }
+        val isVolumeSaved by viewModel.isVolumeSaved(volumeId).collectAsState(initial = false)
         when (val volume = viewModel.volumeItem.collectAsState().value) {
             is RequestState.Success -> {
                 DetailsScreen(
@@ -230,6 +177,7 @@ fun NavGraphBuilder.detailScreenRoute() {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                         context.startActivity(intent)
                     },
+                    isVolumeSaved = isVolumeSaved,
                     onSaveClicked = {
                         val toBeSavedVolume = SavedVolume(
                             title = volume.data.volumeInfo.title,
@@ -242,18 +190,26 @@ fun NavGraphBuilder.detailScreenRoute() {
                             publishingDate = volume.data.volumeInfo.publishedDate,
                             link = volume.data.saleInfo.buyLink ?: ""
                         )
-                        viewModel.addVolumeToSaved(toBeSavedVolume)
+                        if(!isVolumeSaved){
+                            viewModel.addVolumeToSaved(toBeSavedVolume)
+                        }
+                        else{
+                            viewModel.deleteVolumeFromSaved(volumeId)
+                        }
+
                     }
                 )
             }
 
             is RequestState.Loading -> {
-                CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
 
             is RequestState.Error -> {
                 volume.exception.message?.let { it1 -> Log.d("DetailsScreenError", it1) }
-                Text(text = "Error")
+                EmptyScreen()
             }
         }
     }
@@ -269,7 +225,7 @@ fun NavGraphBuilder.savedVolumesRoute(
         val books = viewModel.volumes.collectAsState().value
         when (books) {
             is RequestState.Success -> {
-                val successState = books.data
+
 
                 SavedVolumesScreen(result = books.data, onVolumeClick = {
                     navigateToDetailsScreen(it)
@@ -277,13 +233,15 @@ fun NavGraphBuilder.savedVolumesRoute(
             }
 
             is RequestState.Loading -> {
-                CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
 
             is RequestState.Error -> {
                 // Toast.makeText(LocalContext.current, "Error occurred", Toast.LENGTH_SHORT).show()
                 Log.d("Error (navGraph)", "savedVolumes error")
-                Text(text = "Error")
+                EmptyScreen()
             }
         }
 

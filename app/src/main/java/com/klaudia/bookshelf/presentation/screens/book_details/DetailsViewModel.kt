@@ -8,6 +8,7 @@ import com.klaudia.bookshelf.db.SavedVolume
 import com.klaudia.bookshelf.model.VolumeItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,8 @@ class DetailsViewModel @Inject constructor(private val repository: BooksReposito
 
     private val _volumeItem = MutableStateFlow<RequestState<VolumeItem>>(RequestState.Loading)
     val volumeItem: StateFlow<RequestState<VolumeItem>> = _volumeItem.asStateFlow()
+
+    fun isVolumeSaved(volumeId: String): Flow<Boolean> = repository.isVolumeSaved(volumeId)
 
     fun getVolume(id: String){
         viewModelScope.launch {
@@ -37,4 +40,11 @@ class DetailsViewModel @Inject constructor(private val repository: BooksReposito
             repository.insertVolumeToSaved(volume)
         }
     }
+
+    fun deleteVolumeFromSaved(volumeId: String){
+        viewModelScope.launch {
+            repository.deleteVolumeFromSaved(volumeId)
+        }
+    }
+
 }

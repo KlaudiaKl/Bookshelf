@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -20,21 +21,28 @@ fun SavedVolumesScreen(
     onVolumeClick : (String) -> Unit
 ) {
 
-    Column {
-        Text(text = "Books you've saved:", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyColumn() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        if (result.isNullOrEmpty()) {
+            Text(text = "You have not saved any books yet.", style = MaterialTheme.typography.titleLarge)
+            Text(text = "Click on a book a tap the Save button to add one.", style = MaterialTheme.typography.titleMedium)
+        }
+        else {
+            Text(text = "Books you've saved:", style = MaterialTheme.typography.titleLarge)
+            Spacer(modifier = Modifier.height(8.dp))
 
-            items(items = result, key = { item -> item.id }) {
-                if (!it.title.isNullOrEmpty()) {
-                    HorizontalVolumeItemHolder(
-                        imageUrl = it.thumbnailUrl?:"",
-                        title = it.title,
-                        onClick = {onVolumeClick(it.id)}
+            LazyColumn() {
 
-                    )
+                items(items = result, key = { item -> item.id }) {
+                    if (!it.title.isNullOrEmpty()) {
+                        HorizontalVolumeItemHolder(
+                            imageUrl = it.thumbnailUrl ?: "",
+                            title = it.title,
+                            onClick = { onVolumeClick(it.id) }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
                 }
             }
         }

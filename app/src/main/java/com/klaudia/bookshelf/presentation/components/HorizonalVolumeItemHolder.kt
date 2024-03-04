@@ -1,5 +1,7 @@
 package com.klaudia.bookshelf.presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,8 @@ fun HorizontalVolumeItemHolder(
     imageUrl: String,
     title: String,
     onClick: () -> Unit) {
+    AnimatedVisibility(visible = true, enter = fadeIn()) {
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,6 +40,7 @@ fun HorizontalVolumeItemHolder(
             //modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.titleSmall)
         //fontStyle = MaterialTheme.colorScheme.onBackground)
+    }
     }
 }
 

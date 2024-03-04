@@ -27,7 +27,7 @@ class SearchViewModel @Inject constructor(private val booksRepository: BooksRepo
 
 
     private var searchJob: Job? = null
-    fun search(query: String, loadMore: Boolean) {
+    fun search(query: String, loadMore: Boolean, filter: String?) {
        // Log.d("LoadMore", loadMore.toString())
         if (loadMore) {
             startIndex += 10
@@ -40,7 +40,8 @@ class SearchViewModel @Inject constructor(private val booksRepository: BooksRepo
             val result = withContext(Dispatchers.IO) {
                 booksRepository.searchBooks(
                     query,
-                    startIndex = startIndex
+                    startIndex = startIndex,
+                    filter = filter
                 )
             }
             when (result) {
